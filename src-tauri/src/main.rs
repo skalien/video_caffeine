@@ -44,4 +44,18 @@ async fn analyze(app: tauri::AppHandle, jobs: tauri::State<'_, Jobs>, samples: V
   }; run().map_err(|e|e.to_string())
  }).await.map_err(|e|e.to_string())?
 }
-fn main(){tauri::Builder::default().manage(Jobs::default()).invoke_handler(tauri::generate_handler![analyze,cancel]).run(tauri::generate_context!()).expect("Failed to run app");}
+fn main() {
+ tauri::Builder::default()
+  .plugin(
+   tauri_plugin_window_state::Builder::default()
+    .with_state_flags(
+     tauri_plugin_window_state::StateFlags::SIZE
+      | tauri_plugin_window_state::StateFlags::MAXIMIZED,
+    )
+    .build(),
+  )
+  .manage(Jobs::default())
+  .invoke_handler(tauri::generate_handler![analyze,cancel])
+  .run(tauri::generate_context!())
+  .expect("Failed to run app");
+}

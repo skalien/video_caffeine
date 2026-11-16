@@ -9,3 +9,4 @@ tauri = { version = "2", features = [] }
 serde = { version = "1", features = ["derive"] }
 ort = { version = "=2.0.0-rc.10", features = ["ndarray"] }
 ndarray = "0.16"
+tauri-plugin-window-state = "2"
