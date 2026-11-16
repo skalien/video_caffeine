@@ -4,7 +4,7 @@ import WaveSurfer from 'wavesurfer.js';
 import Regions from 'wavesurfer.js/dist/plugins/regions.esm.js';
 import {Channel,invoke,isTauri} from '@tauri-apps/api/core';
 import './style.css';
-import {nextSpeechTime} from './playback';
+import {skipNonSpeech} from './playback';
 type Frame={start:number;end:number;probability:number};
 function App(){
  const container=useRef<HTMLDivElement>(null), wave=useRef<WaveSurfer|null>(null), regions=useRef<Regions|null>(null), pcm=useRef<Float32Array|null>(null);
@@ -21,7 +21,7 @@ function App(){
  },[frames,threshold,minimum]);
  async function load(file:File){setComplete(false);setLoading(true);setReady(false);setError('');setFrames([]);setProgress(0);wave.current?.pause();try{const ctx=new AudioContext();let decoded:AudioBuffer;try{decoded=await ctx.decodeAudioData(await file.arrayBuffer())}finally{await ctx.close()}const offline=new OfflineAudioContext(1,Math.ceil(decoded.duration*16000),16000);const source=offline.createBufferSource();source.buffer=decoded;source.connect(offline.destination);source.start();pcm.current=(await offline.startRendering()).getChannelData(0);await wave.current!.loadBlob(file);setDuration(decoded.duration);setName(file.name);setReady(true)}catch(e){setError(String(e));pcm.current=null}finally{setLoading(false)}}
  async function analyze(){if(!pcm.current)return;setComplete(false);setBusy(true);setError('');setFrames([]);setProgress(0);try{const channel=new Channel<{frames:Frame[];progress:number}>();channel.onmessage=u=>{setFrames(f=>f.concat(u.frames));setProgress(u.progress)};await invoke('analyze',{samples:Array.from(pcm.current),algorithm:'silero',updates:channel});setComplete(true)}catch(e){setError(String(e))}finally{setBusy(false)}}
- function skipGap(){const w=wave.current;if(!w)return false;const next=nextSpeechTime(speechRegions.current,w.getCurrentTime());if(next===null){w.pause();w.setTime(w.getDuration());return false}if(next!==w.getCurrentTime())w.setTime(next);return true}
+ function skipGap(){const w=wave.current;return w ? skipNonSpeech(w,speechRegions.current) : false}
  async function togglePlayback(){const w=wave.current;if(!w)return;if(w.isPlaying()){w.pause();return}if(w.getCurrentTime()>=w.getDuration())w.setTime(0);if(complete&&!skipGap())return;try{await w.play()}catch(e){setError(String(e))}}
  useEffect(()=>{if(!complete)return;let id=0;const tick=()=>{if(wave.current?.isPlaying())skipGap();id=requestAnimationFrame(tick)};id=requestAnimationFrame(tick);return()=>cancelAnimationFrame(id)},[complete]);
  const clock=(n:number)=>`${Math.floor(n/60)}:${Math.floor(n%60).toString().padStart(2,'0')}`;

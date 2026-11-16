@@ -24,4 +24,4 @@ The selector currently exposes Silero only. New algorithms can use the same time
 
 ## Validation status
 
-Frontend production build can be checked with `npm run build`. Native compilation, WKWebView playback, bundled model loading, and end-to-end inference must be verified on macOS; the development cloud host has no Rust toolchain or macOS SDK. No native build or macOS runtime validation is claimed.
+Run `npm test` for playback regression checks (advancing clocks, speech boundaries, pending seeks, manual seeking, and end-of-speech). Frontend production build can be checked with `npm run build`. Native compilation, WKWebView playback, bundled model loading, and end-to-end inference must be verified on macOS; the development cloud host has no Rust toolchain or macOS SDK. No native build or macOS runtime validation is claimed.

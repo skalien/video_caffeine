@@ -4,3 +4,5 @@ src-tauri/target/
 src-tauri/gen/
 src-tauri/models/*.tmp
 .DS_Store
+
+.test-build/
