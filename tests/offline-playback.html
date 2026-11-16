@@ -1,0 +1,28 @@
+<!doctype html><html><body><pre id="result">RUNNING</pre><script type="module">
+import {SpeechPlayback} from '../.test-build/playback.js';
+try {
+ const rate=48000, offline=new OfflineAudioContext(2,rate,rate);
+ const audio=offline.createBuffer(2,rate,rate);
+ // Distinct markers begin exactly at each speech boundary. Retain both channels.
+ for(let ch=0;ch<2;ch++){
+  const data=audio.getChannelData(ch);
+  for(let i=0;i<rate;i++)data[i]=Math.sin(i*.017+ch)*.2;
+  data[9600]=.9-ch*.1; data[28800]=-.9+ch*.1;
+ }
+ const context={currentTime:0,destination:offline.destination,resume:async()=>{},
+ createBufferSource:()=>offline.createBufferSource()};
+ const player=new SpeechPlayback(context);
+ await player.play(audio,[{start:.2,end:.3},{start:.6,end:.7}],0);
+ const rendered=await offline.startRendering();
+ let maximumError=0;
+ for(let ch=0;ch<2;ch++){
+  const out=rendered.getChannelData(ch),original=audio.getChannelData(ch);
+  for(let i=0;i<4800;i++){
+   maximumError=Math.max(maximumError,Math.abs(out[4800+i]-original[9600+i]));
+   maximumError=Math.max(maximumError,Math.abs(out[9600+i]-original[28800+i]));
+  }
+ }
+ if(maximumError>1e-5)throw Error(`Audio mismatch: ${maximumError}`);
+ document.getElementById('result').textContent=`PASS: both speech segments retain every sample, including their first samples, in both channels. Maximum error: ${maximumError}`;
+}catch(e){document.getElementById('result').textContent=`FAIL: ${e.stack}`}
+</script></body></html>
