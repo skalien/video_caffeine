@@ -15,7 +15,7 @@ fn cancel(jobs: tauri::State<Jobs>) { jobs.cancel.store(true, Ordering::Relaxed)
 #[tauri::command]
 async fn analyze(app: tauri::AppHandle, jobs: tauri::State<'_, Jobs>, samples: Vec<f32>, algorithm: String, updates: Channel<Update>) -> Result<(), String> {
  if algorithm != "silero" { return Err("Unsupported algorithm".into()); }
- if samples.is_empty() || samples.len() > 16000 * 1200 || samples.iter().any(|x| !x.is_finite()) { return Err("Choose valid audio up to 20 minutes long".into()); }
+ if samples.is_empty() || samples.iter().any(|x| !x.is_finite()) { return Err("Choose non-empty audio containing only finite samples".into()); }
  if jobs.busy.swap(true, Ordering::SeqCst) { return Err("An analysis is already running".into()); }
  jobs.cancel.store(false, Ordering::Relaxed);
  let busy = jobs.busy.clone(); let cancelled = jobs.cancel.clone();
