@@ -221,7 +221,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "caffeine-analyzer"
+name = "audio-caffeine"
 version = "0.1.0"
 dependencies = [
  "ndarray",

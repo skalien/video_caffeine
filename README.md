@@ -1,4 +1,4 @@
-# Caffeine Audio Lab
+# Audio Caffeine
 
 macOS audio analyzer built with Tauri 2, Rust, React, and WaveSurfer. Silero VAD v5.1.2 runs through ONNX Runtime's default CPU provider, with intra-op and inter-op threads set to one and parallel graph execution disabled. No accelerator benchmarks or accelerator providers are included.
 
